@@ -3,42 +3,72 @@ import ParticleText from './ParticleText';
 import CatExperience from './CatExperience';
 
 export default function App() {
-  const [isFading, setIsFading] = useState(false);
+  const readView = () => new URLSearchParams(window.location.search).get('view');
+  const [view, setView] = useState(readView);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
   const transitionVideoRef = useRef(null);
   const transitionStartedRef = useRef(false);
 
   const openCatExperience = useCallback(() => {
-    window.location.assign('/?view=cat');
+    if (readView() !== 'cat') {
+      window.history.pushState({ view: 'cat' }, '', '/?view=cat');
+    }
+    setIsTransitioning(false);
+    setIsVideoVisible(false);
+    setView('cat');
   }, []);
+
   const startTransition = useCallback(() => {
     if (transitionStartedRef.current) return;
     transitionStartedRef.current = true;
-    setIsFading(true);
     setIsTransitioning(true);
   }, []);
 
   useEffect(() => {
-    if (!isTransitioning || !transitionVideoRef.current) return;
+    const handlePopState = () => {
+      transitionStartedRef.current = false;
+      setIsTransitioning(false);
+      setIsVideoVisible(false);
+      setView(readView());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (!isTransitioning || !transitionVideoRef.current) return undefined;
 
     const video = transitionVideoRef.current;
-    video.currentTime = 0;
-    video.playbackRate = 2;
-    video.play().catch(openCatExperience);
+    let cancelled = false;
+    const beginPlayback = () => {
+      if (cancelled) return;
+      video.currentTime = 0;
+      video.playbackRate = 2;
+      video.play().then(() => {
+        if (!cancelled) setIsVideoVisible(true);
+      }).catch(openCatExperience);
+    };
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) beginPlayback();
+    else video.addEventListener('loadeddata', beginPlayback, { once: true });
+
+    return () => {
+      cancelled = true;
+      video.removeEventListener('loadeddata', beginPlayback);
+    };
   }, [isTransitioning, openCatExperience]);
 
-  const isCatExperience =
-    window.location.pathname === '/cat' ||
-    window.location.pathname === '/cat/' ||
-    new URLSearchParams(window.location.search).get('view') === 'cat';
+  const isCatExperience = window.location.pathname === '/cat' || window.location.pathname === '/cat/' || view === 'cat';
 
   if (isCatExperience) {
     return <CatExperience />;
   }
 
   return (
-    <main className={isFading ? 'is-fading' : ''}>
-      {!isTransitioning && <section className="portfolio-hero" aria-label="视觉设计作品集">
+    <main>
+      <section className={`portfolio-hero${isTransitioning ? ' is-transitioning' : ''}`} aria-label="视觉设计作品集">
         <div className="particle-stage">
           <ParticleText
             className="title-particle"
@@ -127,22 +157,20 @@ export default function App() {
             glow={false}
           />
         </div>
-      </section>}
-      {isTransitioning && (
-        <div className="video-transition" aria-hidden="true">
-          <video
-            ref={transitionVideoRef}
-            className="video-transition__media"
-            src="/media/particle-to-cat.mp4"
-            muted
-            playsInline
-            preload="auto"
-            defaultPlaybackRate={2}
-            onEnded={openCatExperience}
-            onError={openCatExperience}
-          />
-        </div>
-      )}
+      </section>
+      <div className={`video-transition${isTransitioning ? ' is-active' : ''}${isVideoVisible ? ' is-visible' : ''}`} aria-hidden="true">
+        <video
+          ref={transitionVideoRef}
+          className="video-transition__media"
+          src="/media/particle-to-cat.mp4"
+          muted
+          playsInline
+          preload="auto"
+          defaultPlaybackRate={2}
+          onEnded={openCatExperience}
+          onError={openCatExperience}
+        />
+      </div>
     </main>
   );
 }

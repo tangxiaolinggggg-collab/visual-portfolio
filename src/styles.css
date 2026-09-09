@@ -78,6 +78,10 @@ main.is-fading::after {
   z-index: 1;
 }
 
+.portfolio-hero.is-transitioning {
+  pointer-events: none;
+}
+
 .portfolio-hero {
   position: relative;
   width: 100%;
@@ -89,7 +93,20 @@ main.is-fading::after {
   z-index: 20;
   inset: 0;
   overflow: hidden;
-  background: #05050c;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  background: transparent;
+  transition: opacity 100ms linear, visibility 0s linear 100ms;
+}
+
+.video-transition.is-active {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.video-transition.is-visible {
+  opacity: 1;
 }
 
 .video-transition__media {
