@@ -53,7 +53,9 @@ works.forEach((name, index) => {
   work.className = 'work';
   work.type = 'button';
   work.setAttribute('aria-label', `查看 ${titleFor(name)} 原图`);
-  work.innerHTML = `<img loading="${index < 8 ? 'eager' : 'lazy'}" decoding="async" src="${srcFor(name)}" alt="${titleFor(name)}" />`;
+  // Loading all mobile thumbnails before movement prevents masonry relayouts
+  // from interrupting the automatic scroll as each image enters the viewport.
+  work.innerHTML = `<img loading="${usesTouchScroll || index < 8 ? 'eager' : 'lazy'}" decoding="async" src="${srcFor(name)}" alt="${titleFor(name)}" />`;
   work.addEventListener('click', () => openViewer(name));
   work.addEventListener('mouseenter', () => {
     autoScroll.hoverPaused = true;
@@ -202,5 +204,11 @@ window.addEventListener('pageshow', () => {
 }, { once: true });
 
 window.addEventListener('load', () => {
-  window.setTimeout(() => requestAnimationFrame(keepScrolling), 500);
+  const beginAutoScroll = () => window.setTimeout(() => requestAnimationFrame(keepScrolling), 500);
+  if (!usesTouchScroll) {
+    beginAutoScroll();
+    return;
+  }
+  Promise.all([...grid.querySelectorAll('img')].map(image => image.decode?.().catch(() => {}) ?? Promise.resolve()))
+    .then(beginAutoScroll);
 }, { once: true });
