@@ -510,6 +510,9 @@ const ParticleText = ({
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerleave', handlePointerLeave);
     canvas.addEventListener('click', handleClick);
+    // Some mobile in-app browsers do not synthesize a click for canvas taps.
+    // Listen to touch directly so the full-screen entry always remains usable.
+    canvas.addEventListener('touchstart', handleClick, { passive: true });
 
     const resizeObserver = new ResizeObserver(queueSample);
     resizeObserver.observe(container);
@@ -523,6 +526,7 @@ const ParticleText = ({
       canvas.removeEventListener('pointermove', handlePointerMove);
       canvas.removeEventListener('pointerleave', handlePointerLeave);
       canvas.removeEventListener('click', handleClick);
+      canvas.removeEventListener('touchstart', handleClick);
 
       if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);

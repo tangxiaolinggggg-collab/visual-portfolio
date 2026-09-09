@@ -82,6 +82,8 @@ export default function App() {
       <section
         className={`portfolio-hero${isTransitioning ? ' is-transitioning' : ''}`}
         aria-label="视觉设计作品集"
+        onClick={startTransition}
+        onTouchStart={startTransition}
         onPointerUp={startTransition}
         onTouchEnd={startTransition}
       >
