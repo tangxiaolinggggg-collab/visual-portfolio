@@ -97,7 +97,7 @@ main.is-fading::after {
   visibility: hidden;
   opacity: 0;
   background: transparent;
-  transition: opacity 100ms linear, visibility 0s linear 100ms;
+  transition: opacity 260ms linear, visibility 0s linear 260ms;
 }
 
 .video-transition.is-active {

@@ -7,17 +7,27 @@ export default function App() {
   const [view, setView] = useState(readView);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
+  const handoffTimerRef = useRef(null);
   const transitionVideoRef = useRef(null);
   const transitionStartedRef = useRef(false);
 
-  const openCatExperience = useCallback(() => {
+  const openCatExperience = useCallback(({ keepTransitionFrame = false } = {}) => {
     if (readView() !== 'cat') {
       window.history.pushState({ view: 'cat' }, '', '/?view=cat');
     }
-    setIsTransitioning(false);
-    setIsVideoVisible(false);
+    if (!keepTransitionFrame) {
+      setIsTransitioning(false);
+      setIsVideoVisible(false);
+    }
     setView('cat');
   }, []);
+
+  const finishTransition = useCallback(() => {
+    if (!isTransitioning) return;
+    setIsVideoVisible(false);
+    window.clearTimeout(handoffTimerRef.current);
+    handoffTimerRef.current = window.setTimeout(() => setIsTransitioning(false), 260);
+  }, [isTransitioning]);
 
   const startTransition = useCallback(() => {
     if (transitionStartedRef.current) return;
@@ -34,7 +44,10 @@ export default function App() {
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.clearTimeout(handoffTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -62,12 +75,9 @@ export default function App() {
 
   const isCatExperience = window.location.pathname === '/cat' || window.location.pathname === '/cat/' || view === 'cat';
 
-  if (isCatExperience) {
-    return <CatExperience />;
-  }
-
   return (
-    <main>
+    <>
+      {isCatExperience ? <CatExperience onReady={finishTransition} /> : <main>
       <section className={`portfolio-hero${isTransitioning ? ' is-transitioning' : ''}`} aria-label="视觉设计作品集">
         <div className="particle-stage">
           <ParticleText
@@ -158,6 +168,7 @@ export default function App() {
           />
         </div>
       </section>
+      </main>}
       <div className={`video-transition${isTransitioning ? ' is-active' : ''}${isVideoVisible ? ' is-visible' : ''}`} aria-hidden="true">
         <video
           ref={transitionVideoRef}
@@ -167,10 +178,10 @@ export default function App() {
           playsInline
           preload="auto"
           defaultPlaybackRate={2}
-          onEnded={openCatExperience}
+          onEnded={() => openCatExperience({ keepTransitionFrame: true })}
           onError={openCatExperience}
         />
       </div>
-    </main>
+    </>
   );
 }

@@ -17,7 +17,7 @@ const DISHES = [
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 
-function App() {
+function App({ onReady }) {
   const stageRef = useRef(null)
   const videoRef = useRef(null)
   const gazeRef = useRef(null)
@@ -252,7 +252,7 @@ function App() {
 
   return (
     <main className="cat-experience" ref={stageRef} aria-label="蓝猫会追随三文鱼的眼睛">
-      <video className="cat-video" ref={videoRef} src={CAT_VIDEO} autoPlay muted loop playsInline preload="auto" aria-label="会眨眼的蓝猫" />
+      <video className="cat-video" ref={videoRef} src={CAT_VIDEO} poster="/cat-media/cat-poster.webp" onLoadedData={onReady} autoPlay muted loop playsInline preload="auto" aria-label="会眨眼的蓝猫" />
       <img className="cat-gaze" ref={gazeRef} src={IDLE_FACE} alt="" aria-hidden="true" draggable="false" />
       <div className="cinematic-vignette" aria-hidden="true" />
       <section className={`dish-tray${dishesVisible ? ' is-visible' : ''}`} aria-label="猫咪的点餐盘">
