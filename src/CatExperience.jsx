@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import './CatExperience.css'
+import { sitePath } from './sitePath'
 
-const CAT_VIDEO = '/cat-media/idle-cat.mp4?v=2'
-const SALMON = '/cat-media/salmon-cursor.png'
+const CAT_VIDEO = `${sitePath('cat-media/idle-cat.mp4')}?v=2`
+const SALMON = sitePath('cat-media/salmon-cursor.png')
 const FRAME_COUNT = 17
 const CENTER_FRAME = 8
 const MOVE_SETTLE_MS = 130
 const IDLE_AFTER_MS = 1500
-const IDLE_FACE = '/cat-media/gaze/frame-08.webp'
+const IDLE_FACE = sitePath('cat-media/gaze/frame-08.webp')
 const DISH_APPEAR_DELAY = 3000
 const DISHES = [
-  { label: '套图', href: '/gallery/index.html' },
-  { label: '渲染图', href: '/renders/index.html' },
-  { label: 'AI视频', href: '/ai-video/index.html' },
+  { label: '套图', href: sitePath('gallery/index.html') },
+  { label: '渲染图', href: sitePath('renders/index.html') },
+  { label: 'AI视频', href: sitePath('ai-video/index.html') },
 ]
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
@@ -59,7 +60,7 @@ function App({ onReady }) {
     const gazeFrames = Array.from({ length: FRAME_COUNT }, (_, index) => {
       const image = new Image()
       image.decoding = 'async'
-      image.src = `/cat-media/gaze/frame-${String(index).padStart(2, '0')}.webp`
+      image.src = sitePath(`cat-media/gaze/frame-${String(index).padStart(2, '0')}.webp`)
       return image
     })
 
@@ -252,7 +253,7 @@ function App({ onReady }) {
 
   return (
     <main className="cat-experience" ref={stageRef} aria-label="蓝猫会追随三文鱼的眼睛">
-      <video className="cat-video" ref={videoRef} src={CAT_VIDEO} poster="/cat-media/cat-poster.webp" onLoadedData={onReady} autoPlay muted loop playsInline preload="auto" aria-label="会眨眼的蓝猫" />
+      <video className="cat-video" ref={videoRef} src={CAT_VIDEO} poster={sitePath('cat-media/cat-poster.webp')} onLoadedData={onReady} autoPlay muted loop playsInline preload="auto" aria-label="会眨眼的蓝猫" />
       <img className="cat-gaze" ref={gazeRef} src={IDLE_FACE} alt="" aria-hidden="true" draggable="false" />
       <div className="cinematic-vignette" aria-hidden="true" />
       <section className={`dish-tray${dishesVisible ? ' is-visible' : ''}`} aria-label="猫咪的点餐盘">
@@ -268,7 +269,7 @@ function App({ onReady }) {
             }}
             aria-label={label}
           >
-            <img className="dish-plate" src="/cat-media/ceramic-plate.png?v=round-user-source-3" alt="" aria-hidden="true" draggable="false" />
+            <img className="dish-plate" src={`${sitePath('cat-media/ceramic-plate.png')}?v=round-user-source-3`} alt="" aria-hidden="true" draggable="false" />
             <span className="dish-label">{label}</span>
           </a>
         ))}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ParticleText from './ParticleText';
 import CatExperience from './CatExperience';
+import { sitePath, siteRoot } from './sitePath';
 
 export default function App() {
   const readView = () => new URLSearchParams(window.location.search).get('view');
@@ -13,7 +14,7 @@ export default function App() {
 
   const openCatExperience = useCallback(({ keepTransitionFrame = false } = {}) => {
     if (readView() !== 'cat') {
-      window.history.pushState({ view: 'cat' }, '', '/?view=cat');
+      window.history.pushState({ view: 'cat' }, '', `${sitePath()}?view=cat`);
     }
     if (!keepTransitionFrame) {
       setIsTransitioning(false);
@@ -73,7 +74,7 @@ export default function App() {
     };
   }, [isTransitioning, openCatExperience]);
 
-  const isCatExperience = window.location.pathname === '/cat' || window.location.pathname === '/cat/' || view === 'cat';
+  const isCatExperience = window.location.pathname === `${siteRoot}/cat` || window.location.pathname === `${siteRoot}/cat/` || view === 'cat';
 
   return (
     <>
@@ -178,7 +179,7 @@ export default function App() {
         <video
           ref={transitionVideoRef}
           className="video-transition__media"
-          src="/media/particle-to-cat.mp4"
+          src={sitePath('media/particle-to-cat.mp4')}
           muted
           playsInline
           preload="auto"
