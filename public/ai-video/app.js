@@ -19,7 +19,6 @@ let dragging = false;
 let lastX = 0;
 let tapped = null;
 let lastTime = performance.now();
-let resumeAt = 0;
 
 function makeCard(index) {
   const card = document.createElement('button');
@@ -92,13 +91,13 @@ function draw() {
 function frame(now) {
   const dt = Math.min(.05, (now - lastTime) / 1000); lastTime = now;
   if (target !== null) { position += (target - position) * Math.min(1, dt * 10); if (Math.abs(target - position) < .002) { position = target; target = null; } }
-  else if (!dragging && now > resumeAt) position += dt / 3.2;
+  else if (!dragging) position += dt / 3.2;
   if (!dragging && Math.abs(velocity) > .0008) { position += velocity * dt; velocity *= Math.exp(-3.4 * dt); }
   draw(); requestAnimationFrame(frame);
 }
-track.addEventListener('pointerdown', event => { dragging = true; target = null; velocity = 0; lastX = event.clientX; tapped = event.target.closest('.card'); resumeAt = performance.now() + 4800; track.setPointerCapture(event.pointerId); });
+track.addEventListener('pointerdown', event => { dragging = true; target = null; velocity = 0; lastX = event.clientX; tapped = event.target.closest('.card'); track.setPointerCapture(event.pointerId); });
 track.addEventListener('pointermove', event => { if (!dragging) return; const delta = event.clientX - lastX; lastX = event.clientX; if (Math.abs(delta) > 1) tapped = null; position -= delta / windowWidth(); velocity = velocity * .45 - (delta / windowWidth()) * 13; });
 function release() { if (!dragging) return; dragging = false; if (tapped && Math.abs(velocity) < .15) { const index = cards.indexOf(tapped); if (Math.abs(relative(index)) < .35) openPlayer(index); else target = nearest(index); } tapped = null; }
 track.addEventListener('pointerup', release); track.addEventListener('pointercancel', release);
-track.addEventListener('wheel', event => { if (Math.abs(event.deltaY) < 4) return; event.preventDefault(); resumeAt = performance.now() + 4800; velocity += Math.sign(event.deltaY) * .70; }, { passive: false });
+track.addEventListener('wheel', event => { if (Math.abs(event.deltaY) < 4) return; event.preventDefault(); velocity += Math.sign(event.deltaY) * .70; }, { passive: false });
 window.addEventListener('resize', draw); draw(); requestAnimationFrame(frame);
