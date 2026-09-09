@@ -78,7 +78,12 @@ export default function App() {
   return (
     <>
       {isCatExperience ? <CatExperience onReady={finishTransition} /> : <main>
-      <section className={`portfolio-hero${isTransitioning ? ' is-transitioning' : ''}`} aria-label="视觉设计作品集">
+      <section
+        className={`portfolio-hero${isTransitioning ? ' is-transitioning' : ''}`}
+        aria-label="视觉设计作品集"
+        onPointerUp={startTransition}
+        onTouchEnd={startTransition}
+      >
         <div className="particle-stage">
           <ParticleText
             className="title-particle"
