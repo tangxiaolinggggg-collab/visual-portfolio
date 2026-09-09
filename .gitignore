@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vite/
+*.log
+ai-video-source-git-backup/
+renders-source-git-backup/
+gallery-originals-backup/
+renders-originals-backup/
+media-originals-backup/
+video-optimized-staging/
+portfolio-site.tgz

@@ -1,0 +1,247 @@
+.cat-experience {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: #071a47;
+  cursor: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.cat-video,
+.cat-gaze {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cat-video {
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.cat-gaze {
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.cat-experience.is-idle .cat-video { opacity: 1; }
+.cat-experience.is-idle .cat-gaze { opacity: 0; }
+
+.cinematic-vignette {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 47%, transparent 54%, rgba(0, 7, 28, 0.13) 77%, rgba(0, 5, 20, 0.43) 122%),
+    linear-gradient(180deg, rgba(0, 8, 27, 0.11), transparent 22%, transparent 76%, rgba(0, 5, 18, 0.22));
+  mix-blend-mode: multiply;
+}
+
+.dish-tray {
+  position: absolute;
+  z-index: 4;
+  top: min(calc(clamp(66%, 72vh, 75%) + 200px), calc(100% - clamp(140px, 10vw, 152px)));
+  left: 50%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(32px, 4.5vw, 77px);
+  width: min(76vw, 760px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 22px);
+}
+
+.dish-tray.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.dish {
+  --proximity: 0;
+  --air-lift: 126px;
+  position: relative;
+  display: grid;
+  aspect-ratio: 1.5 / 1;
+  min-width: 0;
+  place-items: center;
+  opacity: 0;
+  transform: perspective(520px) translateY(46px) scale(0.76);
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 16px 12px rgba(0, 5, 19, 0.25));
+  will-change: transform, filter;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  text-decoration: none;
+}
+
+.dish::before,
+.dish::after {
+  position: absolute;
+  pointer-events: none;
+  content: '';
+  border-radius: 50%;
+}
+
+.dish::before,
+.dish::after {
+  display: none;
+}
+
+.dish-plate {
+  position: absolute;
+  z-index: 0;
+  inset: -10.45% -8.52%;
+  width: 117.04%;
+  height: 120.89%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.dish::before {
+  z-index: 0;
+  inset: -11%;
+  background:
+    radial-gradient(circle at 33% 26%, rgba(255, 255, 255, 0.98) 0 4%, transparent 15%),
+    radial-gradient(circle at 50% 48%, #fbfcfd 0 41%, #cbd1d8 42% 47%, #fdfefe 48% 59%, #aeb8c3 60% 63%, #f8fafb 64% 69%, #83909f 70% 72%, #f6f8fa 73% 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.98),
+    inset 0 -6px 9px rgba(70, 85, 102, 0.22),
+    0 12px 14px rgba(0, 7, 26, 0.34);
+}
+
+.dish::after {
+  z-index: 1;
+  inset: 14%;
+  border: 1px solid rgba(157, 169, 181, 0.42);
+  box-shadow: inset 0 5px 9px rgba(113, 127, 143, 0.18), inset 0 -2px 3px rgba(255, 255, 255, 0.9);
+}
+
+.dish-tray.is-visible .dish {
+  animation: dish-arrive 1560ms cubic-bezier(0.2, 0.76, 0.3, 1) var(--delay) both;
+}
+
+.dish.is-near {
+  transform: perspective(520px) translateY(calc(-5px - 7px * var(--proximity))) scale(calc(1 + 0.06 * var(--proximity)));
+  filter:
+    drop-shadow(0 19px 16px rgba(0, 5, 19, 0.37))
+    drop-shadow(0 0 calc(18px * var(--proximity)) rgba(255, 184, 107, calc(var(--proximity) * 0.62)));
+}
+
+.dish.is-dropping {
+  animation: dish-receive 540ms cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+.dish-label {
+  position: relative;
+  z-index: 1;
+  color: #3d5163;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: clamp(20.4px, 1.848vw, 26.4px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-4%);
+  transform-origin: center;
+}
+
+@keyframes dish-arrive {
+  0% {
+    opacity: 0;
+    transform: perspective(620px) translateY(270px) scale(0.62);
+  }
+  35% {
+    opacity: 1;
+    transform: perspective(620px) translateY(calc(-1 * var(--air-lift))) scale(1.07);
+  }
+  56% {
+    transform: perspective(620px) translateY(10px) scaleX(1.07) scaleY(0.91);
+  }
+  68% {
+    transform: perspective(620px) translateY(-20px) scale(1.035);
+  }
+  78% {
+    transform: perspective(620px) rotateZ(0.9deg) translateY(4px) scaleX(1.035) scaleY(0.96);
+  }
+  87% {
+    transform: perspective(620px) rotateZ(-0.65deg) translateY(-7px) scale(1.015);
+  }
+  94% {
+    transform: perspective(620px) rotateZ(0.3deg) translateY(1px) scale(1.005);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(620px) translateY(0) scale(1);
+  }
+}
+
+@keyframes dish-receive {
+  0%, 100% { filter: brightness(1); }
+  28% { transform: perspective(520px) translateY(5px) scale(0.9); filter: brightness(1.16); }
+  62% { transform: perspective(520px) translateY(-4px) scale(1.07); filter: brightness(1.06); }
+}
+
+.salmon-cursor {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  width: clamp(96px, 8.4vw, 136px);
+  max-width: 22vw;
+  height: auto;
+  opacity: 0;
+  filter: drop-shadow(0 9px 10px rgba(0, 0, 0, 0.38));
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform, opacity;
+  transition: opacity 150ms ease;
+}
+
+.salmon-cursor.is-visible { opacity: 1; }
+
+@media (pointer: coarse) {
+  .cat-experience { cursor: auto; }
+  .salmon-cursor { width: clamp(76px, 24vw, 108px); }
+}
+
+@media (max-aspect-ratio: 3 / 4) {
+  .cat-video { object-position: 50% 47%; }
+  .cinematic-vignette {
+    background:
+      radial-gradient(ellipse at 50% 46%, transparent 31%, rgba(0, 7, 28, 0.16) 70%, rgba(0, 5, 20, 0.52) 122%),
+      linear-gradient(180deg, rgba(3, 23, 66, 0.24), transparent 31%, transparent 67%, rgba(0, 8, 31, 0.29));
+  }
+  .dish-tray {
+    top: min(calc(67% + 200px), calc(100% - 260px));
+    grid-template-columns: repeat(2, minmax(112px, 148px));
+    gap: 26px 36px;
+    width: auto;
+    transform: translate(-50%, 22px);
+  }
+  .dish-tray.is-visible { transform: translate(-50%, 0); }
+  .dish { width: clamp(112px, 30vw, 148px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .salmon-cursor { transition: none; }
+  .dish-tray,
+  .dish { transition: none; animation: none !important; }
+  .dish-tray.is-visible .dish { opacity: 1; transform: perspective(520px); }
+}

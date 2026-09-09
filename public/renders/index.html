@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101025" />
+  <title>渲染作品墙 · 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="gallery" aria-label="渲染作品墙">
+    <header class="gallery-head">
+      <div>
+        <p class="eyebrow">RENDER PORTFOLIO · 2026</p>
+        <h1>渲染作品墙</h1>
+      </div>
+      <p class="work-count" id="work-count"></p>
+    </header>
+    <p class="intro">产品渲染与视觉探索。单击任意作品，查看原始尺寸。</p>
+    <section class="masonry" id="gallery-grid" aria-label="渲染作品列表"></section>
+  </main>
+
+  <dialog id="viewer" aria-label="图片原图预览">
+    <div class="viewer-shell">
+      <header class="viewer-head">
+        <p>RENDER PORTFOLIO · ORIGINAL</p>
+        <h2 id="viewer-title"></h2>
+      </header>
+      <button class="viewer-close" id="viewer-close" aria-label="关闭大图">×</button>
+      <div class="viewer-stage" id="viewer-stage"><img id="viewer-image" alt="作品原图" role="button" tabindex="0" aria-pressed="false" /></div>
+      <p class="viewer-tip" id="viewer-tip">原图尺寸 · 单击适应展示框 · ESC 关闭</p>
+    </div>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>

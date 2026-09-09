@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1A1A2E" />
+  <title>作品视频展示</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="stage" aria-label="作品视频展示">
+    <div class="track" id="track" aria-label="左右拖动浏览作品，单击中间窗口播放视频"></div>
+  </main>
+  <dialog class="player" id="player" aria-label="视频播放器">
+    <div class="player-frame">
+      <button class="player-close" id="player-close" type="button" aria-label="关闭视频">×</button>
+      <video id="video" controls playsinline></video>
+      <p id="video-title"></p>
+    </div>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
