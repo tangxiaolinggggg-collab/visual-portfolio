@@ -108,9 +108,6 @@ viewer.addEventListener('close', () => {
 });
 
 function keepScrolling(timestamp) {
-  // On phones, automatic scrolling fights the browser's inertial touch scroll
-  // and makes the work wall appear to spring back after a swipe.
-  if (usesTouchScroll) return;
   if (autoScroll.paused || autoScroll.hoverPaused || autoScroll.pointerPaused) {
     autoScroll.lastTimestamp = null;
     autoScroll.position = null;
@@ -165,6 +162,32 @@ if (!usesTouchScroll) {
   }, { passive: true });
 }
 
+if (usesTouchScroll) {
+  const pauseForTouch = () => {
+    autoScroll.pointerPaused = true;
+    autoScroll.lastTimestamp = null;
+  };
+  const resumeAfterTouch = () => {
+    autoScroll.pointerPaused = false;
+    autoScroll.position = window.scrollY;
+    autoScroll.lastTimestamp = null;
+    // Let native inertial scrolling finish before animation takes over again.
+    autoScroll.resumeAt = performance.now() + 260;
+  };
+
+  window.addEventListener('touchstart', pauseForTouch, { passive: true });
+  window.addEventListener('touchend', resumeAfterTouch, { passive: true });
+  window.addEventListener('touchcancel', resumeAfterTouch, { passive: true });
+  window.addEventListener('scroll', () => {
+    const movedByVisitor = autoScroll.position === null || Math.abs(window.scrollY - autoScroll.position) > 1;
+    if (movedByVisitor) {
+      autoScroll.position = window.scrollY;
+      autoScroll.lastTimestamp = null;
+      autoScroll.resumeAt = performance.now() + 260;
+    }
+  }, { passive: true });
+}
+
 window.addEventListener('pageshow', () => {
   window.scrollTo(0, 0);
   autoScroll.position = 0;
@@ -172,5 +195,5 @@ window.addEventListener('pageshow', () => {
 }, { once: true });
 
 window.addEventListener('load', () => {
-  if (!usesTouchScroll) window.setTimeout(() => requestAnimationFrame(keepScrolling), 500);
+  window.setTimeout(() => requestAnimationFrame(keepScrolling), 500);
 }, { once: true });
