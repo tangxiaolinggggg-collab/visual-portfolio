@@ -1,7 +1,7 @@
 :root { --bg:#101025; --panel:#1a1a31; --text:#f5f4f0; --muted:#a5a5b6; --accent:#ffc966; }
 * { box-sizing:border-box; }
 html { scroll-behavior:auto; }
-body { min-width:320px; margin:0; color:var(--text); background:var(--bg); font-family:'Noto Sans SC',sans-serif; }
+body { min-width:320px; margin:0; color:var(--text); background:var(--bg); font-family:'Noto Sans SC',sans-serif; touch-action:pan-y; }
 body.viewer-open { overflow:hidden; }
 body::before { content:""; position:fixed; z-index:-1; inset:0; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),radial-gradient(circle at 10% 0%,rgba(73,63,141,.23),transparent 32rem); background-size:28px 28px,28px 28px,auto; }
 .gallery { width:min(1440px,100%); margin:0 auto; padding:clamp(30px,5vw,68px) clamp(18px,4vw,56px) 74px; }

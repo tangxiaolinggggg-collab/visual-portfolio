@@ -9,6 +9,7 @@ const viewerTitle = document.querySelector('#viewer-title');
 const stage = document.querySelector('#viewer-stage');
 const viewerTip = document.querySelector('#viewer-tip');
 const autoScroll = { paused: false, hoverPaused: false, pointerPaused: false, lastTimestamp: null, position: null, resumeAt: 0, direction: 1, speed: 87.36 };
+const usesTouchScroll = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 const srcFor = name => `assets/${encodeURIComponent(name.replace(/\.[^.]+$/, '.webp'))}`;
 const titleFor = name => name.replace(/\.jpg$/i, '').replace(/([A-Z])(?=\d)/g, '$1 ');
 
@@ -107,6 +108,9 @@ viewer.addEventListener('close', () => {
 });
 
 function keepScrolling(timestamp) {
+  // On phones, automatic scrolling fights the browser's inertial touch scroll
+  // and makes the work wall appear to spring back after a swipe.
+  if (usesTouchScroll) return;
   if (autoScroll.paused || autoScroll.hoverPaused || autoScroll.pointerPaused) {
     autoScroll.lastTimestamp = null;
     autoScroll.position = null;
@@ -133,31 +137,33 @@ function keepScrolling(timestamp) {
   requestAnimationFrame(keepScrolling);
 }
 
-window.addEventListener('wheel', () => {
-  autoScroll.resumeAt = performance.now() + 120;
-  requestAnimationFrame(() => {
+if (!usesTouchScroll) {
+  window.addEventListener('wheel', () => {
+    autoScroll.resumeAt = performance.now() + 120;
+    requestAnimationFrame(() => {
+      autoScroll.position = window.scrollY;
+      autoScroll.lastTimestamp = null;
+    });
+  }, { passive: true });
+
+  window.addEventListener('pointerdown', () => {
+    autoScroll.pointerPaused = true;
+    autoScroll.lastTimestamp = null;
+  }, { passive: true });
+
+  function resumeAfterPointer() {
+    if (!autoScroll.pointerPaused) return;
+    autoScroll.pointerPaused = false;
     autoScroll.position = window.scrollY;
     autoScroll.lastTimestamp = null;
-  });
-}, { passive: true });
+  }
 
-window.addEventListener('pointerdown', () => {
-  autoScroll.pointerPaused = true;
-  autoScroll.lastTimestamp = null;
-}, { passive: true });
-
-function resumeAfterPointer() {
-  if (!autoScroll.pointerPaused) return;
-  autoScroll.pointerPaused = false;
-  autoScroll.position = window.scrollY;
-  autoScroll.lastTimestamp = null;
+  window.addEventListener('pointerup', resumeAfterPointer, { passive: true });
+  window.addEventListener('pointercancel', resumeAfterPointer, { passive: true });
+  window.addEventListener('scroll', () => {
+    if (autoScroll.pointerPaused) autoScroll.position = window.scrollY;
+  }, { passive: true });
 }
-
-window.addEventListener('pointerup', resumeAfterPointer, { passive: true });
-window.addEventListener('pointercancel', resumeAfterPointer, { passive: true });
-window.addEventListener('scroll', () => {
-  if (autoScroll.pointerPaused) autoScroll.position = window.scrollY;
-}, { passive: true });
 
 window.addEventListener('pageshow', () => {
   window.scrollTo(0, 0);
@@ -166,5 +172,5 @@ window.addEventListener('pageshow', () => {
 }, { once: true });
 
 window.addEventListener('load', () => {
-  window.setTimeout(() => requestAnimationFrame(keepScrolling), 500);
+  if (!usesTouchScroll) window.setTimeout(() => requestAnimationFrame(keepScrolling), 500);
 }, { once: true });
