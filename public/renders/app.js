@@ -8,7 +8,7 @@ const viewerImage = document.querySelector('#viewer-image');
 const viewerTitle = document.querySelector('#viewer-title');
 const stage = document.querySelector('#viewer-stage');
 const viewerTip = document.querySelector('#viewer-tip');
-const autoScroll = { paused: false, hoverPaused: false, pointerPaused: false, lastTimestamp: null, position: null, resumeAt: 0, direction: 1, speed: 87.36 };
+const autoScroll = { paused: false, hoverPaused: false, pointerPaused: false, lastTimestamp: null, position: null, programmaticScrollY: null, resumeAt: 0, direction: 1, speed: 87.36 };
 const usesTouchScroll = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 const srcFor = name => `assets/${encodeURIComponent(name.replace(/\.[^.]+$/, '.webp'))}`;
 const titleFor = name => name.replace(/\.jpg$/i, '').replace(/([A-Z])(?=\d)/g, '$1 ');
@@ -125,6 +125,10 @@ function keepScrolling(timestamp) {
         autoScroll.position = 0;
         autoScroll.direction = 1;
       }
+      // Round to whole pixels for mobile browsers and remember the destination
+      // so the following scroll event is not mistaken for a finger gesture.
+      autoScroll.position = Math.round(autoScroll.position);
+      autoScroll.programmaticScrollY = autoScroll.position;
       window.scrollTo(0, autoScroll.position);
     } else {
       autoScroll.position = window.scrollY;
@@ -179,6 +183,9 @@ if (usesTouchScroll) {
   window.addEventListener('touchend', resumeAfterTouch, { passive: true });
   window.addEventListener('touchcancel', resumeAfterTouch, { passive: true });
   window.addEventListener('scroll', () => {
+    const movedByAnimation = autoScroll.programmaticScrollY !== null
+      && Math.abs(window.scrollY - autoScroll.programmaticScrollY) <= 3;
+    if (movedByAnimation) return;
     const movedByVisitor = autoScroll.position === null || Math.abs(window.scrollY - autoScroll.position) > 1;
     if (movedByVisitor) {
       autoScroll.position = window.scrollY;
