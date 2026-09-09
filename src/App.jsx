@@ -9,6 +9,7 @@ export default function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const handoffTimerRef = useRef(null);
+  const mobileFallbackTimerRef = useRef(null);
   const transitionVideoRef = useRef(null);
   const transitionStartedRef = useRef(false);
 
@@ -34,7 +35,10 @@ export default function App() {
     if (transitionStartedRef.current) return;
     transitionStartedRef.current = true;
     setIsTransitioning(true);
-  }, []);
+    // Some mobile in-app browsers leave video.play() pending indefinitely.
+    // Continue to the destination rather than leaving a tapped visitor frozen.
+    mobileFallbackTimerRef.current = window.setTimeout(() => openCatExperience(), 1200);
+  }, [openCatExperience]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -48,8 +52,15 @@ export default function App() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
       window.clearTimeout(handoffTimerRef.current);
+      window.clearTimeout(mobileFallbackTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    const beginFromNativeTouch = () => startTransition();
+    window.addEventListener('touchstart', beginFromNativeTouch, { passive: true });
+    return () => window.removeEventListener('touchstart', beginFromNativeTouch);
+  }, [startTransition]);
 
   useEffect(() => {
     if (!isTransitioning || !transitionVideoRef.current) return undefined;
@@ -61,7 +72,10 @@ export default function App() {
       video.currentTime = 0;
       video.playbackRate = 2;
       video.play().then(() => {
-        if (!cancelled) setIsVideoVisible(true);
+        if (!cancelled) {
+          window.clearTimeout(mobileFallbackTimerRef.current);
+          setIsVideoVisible(true);
+        }
       }).catch(openCatExperience);
     };
 
