@@ -9,7 +9,7 @@ const CENTER_FRAME = 8
 const MOVE_SETTLE_MS = 130
 const IDLE_AFTER_MS = 1500
 const IDLE_FACE = sitePath('cat-media/gaze/frame-08.webp')
-const DISH_APPEAR_DELAY = 1000
+const DISH_APPEAR_DELAY = 600
 const DISHES = [
   { label: '套图', href: sitePath('gallery/index.html') },
   { label: '渲染图', href: sitePath('renders/index.html') },
