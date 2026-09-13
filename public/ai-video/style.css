@@ -1,8 +1,10 @@
 :root { --ground: #1a1a2e; --glass: #222233; }
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; background: var(--ground); }
-body { overflow: hidden; }
-.stage { width: 100%; height: 100svh; min-height: 320px; display: grid; place-items: center; background: var(--ground); }
+body { display:grid; grid-template-rows:auto minmax(0,1fr); overflow: hidden; }
+.portfolio-banner { width:min(1415px,calc(100% - 36px)); margin:clamp(18px,3vw,34px) auto 14px; overflow:hidden; border:1px solid rgba(255,255,255,.16); border-radius:14px; background:var(--glass); box-shadow:0 16px 34px rgba(0,0,0,.2); }
+.portfolio-banner img { display:block; width:100%; height:auto; }
+.stage { width: 100%; height:100%; min-height: 0; display: grid; place-items: center; background: var(--ground); }
 .track { position: relative; width: 100%; height: 100%; overflow: hidden; touch-action: pan-y; cursor: grab; user-select: none; perspective: 960px; }
 .track:active { cursor: grabbing; }
 .card { position: absolute; top: 50%; left: 50%; width: 360px; aspect-ratio: 1 / 1; padding: 0; border: 0; color: transparent; background: transparent; transform-origin: center; transform-style: preserve-3d; will-change: transform, opacity, filter; cursor: pointer; }
@@ -17,5 +19,5 @@ body { overflow: hidden; }
 .player p { margin: 8px 4px 1px; font: 500 12px "Noto Sans SC", "Microsoft YaHei", sans-serif; color: rgba(245, 244, 240, .8); }
 .player-close { position: absolute; z-index: 1; top: -17px; right: -17px; display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid rgba(255, 255, 255, .34); border-radius: 50%; color: #fff; background: #222233; font-size: 25px; line-height: 1; cursor: pointer; }
 .player-close:hover { background: #ffc966; color: #1a1a2e; }
-@media (max-width: 640px) { .player { padding: 16px; } .player-frame { width: 100%; height: auto; aspect-ratio: 16 / 10; } .player-close { top: -12px; right: -8px; } }
+@media (max-width: 640px) { .portfolio-banner { width:calc(100% - 24px); margin:12px auto 10px; border-radius:9px; } .player { padding: 16px; } .player-frame { width: 100%; height: auto; aspect-ratio: 16 / 10; } .player-close { top: -12px; right: -8px; } }
 @media (max-width: 640px) { .card { border-radius: 6px; } .window { border-radius: 6px; } }
