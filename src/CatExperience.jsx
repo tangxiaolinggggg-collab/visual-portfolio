@@ -47,6 +47,8 @@ function App({ onReady }) {
       dropStartedAt: 0,
       dropUntil: 0,
       dishCooldowns: Array(DISHES.length).fill(0),
+      dishMetrics: [],
+      dishProximity: Array(DISHES.length).fill(-1),
       lastX: innerWidth / 2, lastY: innerHeight / 2, lastTime: performance.now(),
     }
     let animationFrame = 0
@@ -55,7 +57,10 @@ function App({ onReady }) {
     let movementTimer = 0
     let touchTimer = 0
     let idleTransitionTimer = 0
+    let geometryFrame = 0
+    let dishGeometryTimer = 0
     const dishTimer = setTimeout(() => setDishesVisible(true), reducedMotion ? 0 : DISH_APPEAR_DELAY)
+    const dishTray = stage.querySelector('.dish-tray')
 
     const gazeFrames = Array.from({ length: FRAME_COUNT }, (_, index) => {
       const image = new Image()
@@ -77,6 +82,29 @@ function App({ onReady }) {
         dish?.style.setProperty('--proximity', '0')
       })
     }
+
+    // Reading element bounds during every animation frame forces layout work just
+    // when the pointer is moving. The tray is stationary after it arrives, so keep
+    // its hit areas cached and update them only after a layout change.
+    const refreshDishMetrics = () => {
+      geometryFrame = 0
+      state.dishMetrics = dishRefs.current.map((dish) => {
+        if (!dish) return null
+        const rect = dish.getBoundingClientRect()
+        return {
+          centerX: rect.left + rect.width / 2,
+          centerY: rect.top + rect.height / 2,
+          radius: Math.max(rect.width, rect.height) * 0.54,
+        }
+      })
+    }
+
+    const scheduleDishMetricRefresh = () => {
+      if (!geometryFrame) geometryFrame = requestAnimationFrame(refreshDishMetrics)
+    }
+
+    const resizeObserver = new ResizeObserver(scheduleDishMetricRefresh)
+    resizeObserver.observe(stage)
 
     const showIdleFace = () => {
       currentFrame = CENTER_FRAME
@@ -108,6 +136,7 @@ function App({ onReady }) {
     }
 
     const followPointer = (event) => {
+      const wasPointerActive = state.pointerActive
       const now = performance.now()
       const elapsed = Math.max(8, now - state.lastTime)
       const dx = event.clientX - state.lastX
@@ -125,16 +154,18 @@ function App({ onReady }) {
       clearIdleTransition()
       state.moving = true
       state.pointerActive = true
-      gaze.src = gazeFrames[currentFrame].src
-      stage.classList.add('has-pointer', 'is-tracking')
-      salmon.classList.add('is-visible')
+      if (!wasPointerActive) {
+        stage.classList.add('has-pointer', 'is-tracking')
+        salmon.classList.add('is-visible')
+      }
       movementTimer = setTimeout(stopTracking, MOVE_SETTLE_MS)
     }
 
     const updateDishes = (time) => {
-      const dishes = dishRefs.current.filter(Boolean)
-      const trayIsVisible = stage.querySelector('.dish-tray')?.classList.contains('is-visible')
+      const dishes = dishRefs.current
+      const trayIsVisible = dishTray?.classList.contains('is-visible')
       if (!state.pointerActive || !trayIsVisible || dishes.length === 0) return { offsetX: 0, offsetY: 0 }
+      if (state.dishMetrics.length !== dishes.length) refreshDishMetrics()
 
       let closest = -1
       let closestDistance = Infinity
@@ -143,13 +174,15 @@ function App({ onReady }) {
       let closestRadius = 1
 
       dishes.forEach((dish, index) => {
-        const rect = dish.getBoundingClientRect()
-        const centerX = rect.left + rect.width / 2
-        const centerY = rect.top + rect.height / 2
+        const metric = state.dishMetrics[index]
+        if (!metric) return
+        const { centerX, centerY, radius } = metric
         const distance = Math.hypot(state.fishX - centerX, state.fishY - centerY)
-        const radius = Math.max(rect.width, rect.height) * 0.54
         const proximity = clamp(1 - distance / (radius * 1.85), 0, 1)
-        dish.style.setProperty('--proximity', proximity.toFixed(3))
+        if (Math.abs(proximity - state.dishProximity[index]) > 0.012) {
+          state.dishProximity[index] = proximity
+          dish.style.setProperty('--proximity', proximity.toFixed(3))
+        }
         dish.classList.toggle('is-near', proximity > 0.04)
 
         if (distance < closestDistance) {
@@ -177,9 +210,9 @@ function App({ onReady }) {
           state.dropDish = -1
           return { offsetX: 0, offsetY: 0 }
         }
-        const rect = droppingDish.getBoundingClientRect()
-        const centerX = rect.left + rect.width / 2
-        const centerY = rect.top + rect.height / 2
+        const metric = state.dishMetrics[state.dropDish]
+        if (!metric) return { offsetX: 0, offsetY: 0 }
+        const { centerX, centerY } = metric
         const progress = clamp((time - state.dropStartedAt) / 540, 0, 1)
         const pull = Math.sin(progress * Math.PI) * 0.92
         return { offsetX: (centerX - state.fishX) * pull, offsetY: (centerY - state.fishY) * pull }
@@ -230,6 +263,7 @@ function App({ onReady }) {
     stage.addEventListener('pointerup', onPointerUp, { passive: true })
     stage.addEventListener('pointercancel', onPointerUp, { passive: true })
     addEventListener('blur', settle)
+    dishGeometryTimer = setTimeout(scheduleDishMetricRefresh, DISH_APPEAR_DELAY + 1700)
     video.play().catch(() => {})
     stage.classList.add('is-idle')
     animationFrame = requestAnimationFrame(render)
@@ -239,7 +273,10 @@ function App({ onReady }) {
       clearTimeout(movementTimer)
       clearTimeout(touchTimer)
       clearTimeout(dishTimer)
+      clearTimeout(dishGeometryTimer)
       clearIdleTransition()
+      cancelAnimationFrame(geometryFrame)
+      resizeObserver.disconnect()
       clearDishFeedback()
       gazeFrames.forEach((image) => { image.src = '' })
       stage.removeEventListener('pointermove', followPointer)
