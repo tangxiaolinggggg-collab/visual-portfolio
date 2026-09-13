@@ -10,7 +10,9 @@ const stage = document.querySelector('#viewer-stage');
 const viewerTip = document.querySelector('#viewer-tip');
 const autoScroll = { paused: false, hoverPaused: false, pointerPaused: false, lastTimestamp: null, position: null, programmaticScrollY: null, resumeAt: 0, direction: 1, speed: 87.36 };
 const usesTouchScroll = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
-const srcFor = name => `assets/${encodeURIComponent(name.replace(/\.[^.]+$/, '.webp'))}`;
+const assetNameFor = name => encodeURIComponent(name.replace(/\.[^.]+$/, '.webp'));
+const thumbFor = name => `thumbs/${assetNameFor(name)}`;
+const originalFor = name => `assets/${assetNameFor(name)}`;
 const titleFor = name => name.replace(/\.jpg$/i, '').replace(/([A-Z])(?=\d)/g, '$1 ');
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -55,7 +57,7 @@ works.forEach((name, index) => {
   work.setAttribute('aria-label', `查看 ${titleFor(name)} 原图`);
   // Loading all mobile thumbnails before movement prevents masonry relayouts
   // from interrupting the automatic scroll as each image enters the viewport.
-  work.innerHTML = `<img loading="${usesTouchScroll || index < 8 ? 'eager' : 'lazy'}" decoding="async" src="${srcFor(name)}" alt="${titleFor(name)}" />`;
+  work.innerHTML = `<img loading="${usesTouchScroll || index < 8 ? 'eager' : 'lazy'}" decoding="async" src="${thumbFor(name)}" alt="${titleFor(name)}" />`;
   work.addEventListener('click', () => openViewer(name));
   work.addEventListener('mouseenter', () => {
     autoScroll.hoverPaused = true;
@@ -84,7 +86,7 @@ function setFitView(fit) {
 function openViewer(name) {
   setFitView(false);
   viewerImage.addEventListener('load', centerScroll, { once: true });
-  viewerImage.src = srcFor(name);
+  viewerImage.src = originalFor(name);
   viewerImage.alt = titleFor(name);
   viewerTitle.textContent = titleFor(name);
   autoScroll.paused = true;
