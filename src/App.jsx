@@ -5,7 +5,10 @@ import { sitePath, siteRoot } from './sitePath';
 
 export default function App() {
   const readView = () => new URLSearchParams(window.location.search).get('view');
-  const [view, setView] = useState(readView);
+  // The portfolio now opens directly on the cat experience. The original
+  // particle introduction remains available at ?view=particle for review or
+  // for an instant return to the prior opening experience.
+  const [view, setView] = useState(readView() || 'cat');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const handoffTimerRef = useRef(null);
@@ -45,7 +48,7 @@ export default function App() {
       transitionStartedRef.current = false;
       setIsTransitioning(false);
       setIsVideoVisible(false);
-      setView(readView());
+      setView(readView() || 'cat');
     };
 
     window.addEventListener('popstate', handlePopState);
